@@ -225,6 +225,7 @@
     text-decoration:none;
   }
   .btn:active{ background: var(--sage-soft); }
+  .cal-actions{ margin-top: 24px; }
   .btn-full{
     width:100%;
     margin-top: 8px;
@@ -423,6 +424,10 @@
       </tbody>
     </table>
     <div class="dday" id="ddayText"></div>
+    <div class="btn-row cal-actions">
+      <a class="btn" id="addGoogleCal" href="#" target="_blank" rel="noopener">구글 캘린더에 추가</a>
+      <button class="btn" id="addIcsCal" type="button">아이폰 · 기타 캘린더에 추가</button>
+    </div>
   </section>
 
   <section class="location">
@@ -489,8 +494,8 @@
         </div>
         <div class="acc-body" id="acc1">
           <div class="in">
-            <div class="acc-line"><span>강승구 (아버지) · 국민 000-00-000000</span><button class="copy" data-copy="000-00-000000">복사</button></div>
-            <div class="acc-line"><span>심규나 (어머니) · 신한 000-00-000000</span><button class="copy" data-copy="000-00-000000">복사</button></div>
+            <div class="acc-line"><span>강승구 (아버지) · 국민 008240210802</span><button class="copy" data-copy="008240210802">복사</button></div>
+            <div class="acc-line"><span>심규나 (어머니) · 국민 343-21-0417-101</span><button class="copy" data-copy="343210417101">복사</button></div>
             <div class="acc-line"><span>강지현 (신랑) · 카카오뱅크 3333-10-8132591</span><button class="copy" data-copy="3333-10-8132591">복사</button></div>
           </div>
         </div>
@@ -527,6 +532,53 @@
     if(diff > 0) el.textContent = '결혼식까지 D-' + diff;
     else if(diff === 0) el.textContent = '오늘, 결혼식 당일입니다';
     else el.textContent = 'D+' + Math.abs(diff);
+  })();
+
+  // 캘린더에 추가 (2027-02-28 12:30 KST = 03:30 UTC, 2시간)
+  (function(){
+    const title = '강지현 · 유지혜 결혼식';
+    const place = '셀럽앤어셈 (서울 강남구 언주로 711 건설회관 2층)';
+    const memo = '낮 12시 30분 · 셀럽앤어셈';
+    const start = '20270228T033000Z', end = '20270228T053000Z';
+
+    document.getElementById('addGoogleCal').href =
+      'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+      '&text=' + encodeURIComponent(title) +
+      '&dates=' + start + '/' + end +
+      '&details=' + encodeURIComponent(memo) +
+      '&location=' + encodeURIComponent(place);
+
+    document.getElementById('addIcsCal').addEventListener('click', () => {
+      const ics = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//mobile-invite//KO',
+        'CALSCALE:GREGORIAN',
+        'BEGIN:VEVENT',
+        'UID:wedding-20270228@mobile-invite',
+        'DTSTAMP:20260101T000000Z',
+        'DTSTART:' + start,
+        'DTEND:' + end,
+        'SUMMARY:' + title,
+        'LOCATION:' + place,
+        'DESCRIPTION:' + memo,
+        'BEGIN:VALARM',
+        'TRIGGER:-P1D',
+        'ACTION:DISPLAY',
+        'DESCRIPTION:내일은 ' + title + '입니다',
+        'END:VALARM',
+        'END:VEVENT',
+        'END:VCALENDAR'
+      ].join('\r\n');
+      const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'wedding.ics';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
   })();
 
   // 아코디언
